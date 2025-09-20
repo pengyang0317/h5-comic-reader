@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { webVitalsMonitor, WebVitalsData } from '../utils/webVitals'
 
 interface PerformanceData {
   fps: number
@@ -8,6 +9,8 @@ interface PerformanceData {
   scrollFps: number
   cacheHitRate: number
   averageLoadTime: number
+  webVitals: Partial<WebVitalsData>
+  performanceScore: number
 }
 
 export function usePerformanceMonitor() {
@@ -18,7 +21,9 @@ export function usePerformanceMonitor() {
     loadTime: 0,
     scrollFps: 60,
     cacheHitRate: 0,
-    averageLoadTime: 0
+    averageLoadTime: 0,
+    webVitals: {},
+    performanceScore: 100
   })
 
   const frameCountRef = useRef(0)
@@ -37,11 +42,16 @@ export function usePerformanceMonitor() {
       if (now - lastTimeRef.current >= 1000) {
         const fps = Math.round(frameCountRef.current * 1000 / (now - lastTimeRef.current))
 
+        const webVitals = webVitalsMonitor.getVitalsData()
+        const performanceScore = webVitalsMonitor.getPerformanceScore(webVitals)
+
         setPerformanceData(prev => ({
           ...prev,
           fps,
           memory: getMemoryUsage(),
-          loadTime: getPageLoadTime()
+          loadTime: getPageLoadTime(),
+          webVitals,
+          performanceScore
         }))
 
         frameCountRef.current = 0
@@ -112,6 +122,20 @@ export function usePerformanceMonitor() {
     }
   }, [])
 
+  // Web Vitals监听
+  useEffect(() => {
+    const unsubscribe = webVitalsMonitor.subscribe((vitals) => {
+      const performanceScore = webVitalsMonitor.getPerformanceScore(vitals)
+      setPerformanceData(prev => ({
+        ...prev,
+        webVitals: vitals,
+        performanceScore
+      }))
+    })
+
+    return unsubscribe
+  }, [])
+
   const updateCacheSize = (size: number) => {
     setPerformanceData(prev => ({
       ...prev,
@@ -119,7 +143,24 @@ export function usePerformanceMonitor() {
     }))
   }
 
-  return { ...performanceData, updateCacheSize }
+  const getCurrentWebVitals = async () => {
+    const vitals = await webVitalsMonitor.getCurrentMetrics()
+    const performanceScore = webVitalsMonitor.getPerformanceScore(vitals)
+
+    setPerformanceData(prev => ({
+      ...prev,
+      webVitals: vitals,
+      performanceScore
+    }))
+
+    return { vitals, performanceScore }
+  }
+
+  return {
+    ...performanceData,
+    updateCacheSize,
+    getCurrentWebVitals
+  }
 }
 
 function getMemoryUsage(): number {

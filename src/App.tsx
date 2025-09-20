@@ -4,7 +4,6 @@ import PerformanceMonitor from './components/PerformanceMonitor'
 import Controls from './components/Controls'
 import PageCounter from './components/PageCounter'
 import LoadingIndicator from './components/LoadingIndicator'
-import JumpDialog from './components/JumpDialog'
 import { usePerformanceMonitor } from './hooks/usePerformanceMonitor'
 import { ImageCacheProvider } from './context/ImageCacheContext'
 
@@ -15,7 +14,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [isAutoReading, setIsAutoReading] = useState(false)
   const [showPerformance, setShowPerformance] = useState(false)
-  const [showJumpDialog, setShowJumpDialog] = useState(false)
   const autoReadRef = useRef<NodeJS.Timeout>()
 
   const performanceData = usePerformanceMonitor()
@@ -63,16 +61,6 @@ function App() {
     setShowPerformance(prev => !prev)
   }, [])
 
-  const jumpToPage = useCallback((page: number) => {
-    if (page >= 1 && page <= TOTAL_PAGES) {
-      setCurrentPage(page)
-      setShowJumpDialog(false)
-    }
-  }, [])
-
-  const toggleJumpDialog = useCallback(() => {
-    setShowJumpDialog(prev => !prev)
-  }, [])
 
   useEffect(() => {
     return () => {
@@ -122,16 +110,7 @@ function App() {
         <Controls
           onToggleAutoRead={toggleAutoRead}
           onTogglePerformanceMonitor={togglePerformanceMonitor}
-          onToggleJumpDialog={toggleJumpDialog}
           isAutoReading={isAutoReading}
-        />
-
-        <JumpDialog
-          visible={showJumpDialog}
-          currentPage={currentPage}
-          totalPages={TOTAL_PAGES}
-          onJump={jumpToPage}
-          onClose={() => setShowJumpDialog(false)}
         />
       </div>
     </ImageCacheProvider>
