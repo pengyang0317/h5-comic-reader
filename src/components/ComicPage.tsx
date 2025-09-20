@@ -130,3 +130,5 @@ function ComicPage({ pageNumber, isVisible }: ComicPageProps) {
 }
 
 export default React.memo(ComicPage)
+
+

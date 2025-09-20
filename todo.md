@@ -435,3 +435,5 @@ class AdaptiveProtection {
 ## 图片获取
 - 没有图片数据
 - 在 https://picsum.photos/seed/{seed}/800/1200中 只要将 {seed} 从 1 到 10000 循环，即可生成​1​万张不同图片。
+
+

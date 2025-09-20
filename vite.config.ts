@@ -11,7 +11,7 @@ export default defineConfig({
   },
   build: {
     target: 'es2015',
-    minify: 'terser',
+    minify: 'esbuild', // 改用esbuild压缩，避免terser依赖问题
     outDir: 'dist',
     assetsDir: 'assets',
     rollupOptions: {
